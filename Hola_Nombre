@@ -1,0 +1,111 @@
+#include <p16F887.inc>	
+    __CONFIG    _CONFIG1, _LVP_OFF & _FCMEN_OFF & _IESO_OFF & _BOR_OFF & _CPD_OFF & _CP_OFF & _MCLRE_OFF & _PWRTE_ON & _WDT_OFF & _INTRC_OSC_NOCLKOUT
+    __CONFIG    _CONFIG2, _WRT_OFF & _BOR21V
+CONT	EQU	20H
+CONT1	EQU	21H
+CONT2	EQU	22H
+Org 0
+INICIO:
+	bsf	STATUS,RP0	; seleccionamos con RP0 encendido el BANCO 1
+	clrf 	TRISD     	; indicamos que el PORTD tiene los 8 bits como salidas
+	clrf         TRISC
+     	bcf     	STATUS,RP0  	; regresamos con RP0 apagado al BANCO 0
+CICLO:
+; para controlar el display usaremos los bits del puerto D para prender y apagar la parte externa, y los bits del puerto c para la parte interna, la validez de este programa depende de como se puentee los bits de cada puerto al display hexadecimal, no se usa el punto decimal
+Movlw 00110011 
+Movwf PORTD
+Movlw 00000011
+Movwf PORTC
+Call delay8 ;; H
+Movlw 11111111
+Movwf PORTD
+Movlw 00000000
+Movwf PORTC
+Call delay8 ;;O
+Movlw 00001111
+Movwf PORTD
+Movlw 00000000
+Movwf PORTC
+Call delay8;; L
+Movlw 11110011
+Movwf PORTD
+Movlw 00000000
+Movwf PORTC
+Call delay8;;A
+Movlw 11011111
+Movwf PORTD
+Movlw 00000011
+Movwf PORTC
+Call Delay8 ;;G
+Movlw 11110011
+Movwf PORTD
+Movlw 00000000
+Movwf PORTC
+Call delay8;;A
+Movlw 11100011
+Movwf PORTD
+Movlw 00000011
+Movwf PORTC
+Call delay8 ;;P
+Movlw 11011111
+Movwf PORTD
+Movlw 00000011
+Movwf PORTC
+Call Delay16 ;;G
+Goto CICLO
+
+;**************************************************************************************
+Delay16:
+	movlw	0x0		; cargamos el registro W con el valor de retraso     	
+	movwf 	CONT		; movemos el valor de W a CONT (PB)
+	movlw	0x0		; cargamos el registro W con el valor de retraso     	
+	movwf 	CONT1		; movemos el valor de W a CONT1 (PA)
+del8:
+	decf	CONT,1		; decrementamos el registro CONT 
+	btfss	STATUS, Z	; el contador llegó a 0? (Z=1)?
+	goto	del8		; sigue decrementando
+del16:
+	decf	CONT1,1	; decrementamos el registro CONT1 
+	btfss	STATUS, Z	; el contador llegó a 0? (Z=1)?
+	goto	del8		; sigue decrementando
+	return			; regresa
+
+;**************************************************************************************
+	end
+
+;**************************************************************************************
+Delay24:
+	movlw	0x0		; cargamos el registro W con el valor de retraso     	
+	movwf 	CONT		; movemos el valor de W a CONT (PB)
+	movlw	0x0		; cargamos el registro W con el valor de retraso     	
+	movwf 	CONT1		; movemos el valor de W a CONT1 (PM)
+	movlw	0x02		; cargamos el registro W con el valor de retraso     	
+	movwf 	CONT2		; movemos el valor de W a CONT2 (PA)
+del8:
+	decf	CONT,1		; decrementamos el registro CONT 
+	btfss	STATUS, Z	; el contador llegó a 0? (Z=1)?
+	goto	del8		; sigue decrementando
+del16:
+	decf	CONT1,1	; decrementamos el registro CONT1 
+	btfss	STATUS, Z	; el contador llegó a 0? (Z=1)?
+	goto	del8		; sigue decrementando
+del24:
+	decfsz	CONT2,1	; decrementamos el registro CONT2, pregunta por el contador, llegó a 0? (Z=1)?
+	goto	del8		; sigue decrementando
+	return			; regresa
+
+;***************************************************************************************
+    	end
+
+;*************************************************************************************
+Delay8:
+	movlw	0x0		; cargamos el registro W con el valor de retraso     	
+	movwf 	CONT		; movemos el valor de W a CONT
+del8:
+	decf	CONT,1		; decrementamos el registro CONT 
+	btfss	STATUS, Z	; el contador llegó a 0? (Z=1)?
+	goto	del8		; sigue decrementando
+	return			; regresa
+
+;**************************************************************************************
+	end
